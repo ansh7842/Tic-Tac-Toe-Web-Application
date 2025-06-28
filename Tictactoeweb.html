@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tic Tac Toe</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="Tictactoeweb.css">
+</head>
+<body>
+  <h1>Tic Tac Toe</h1>
+
+  <select id="mode" onchange="resetGame()">
+    <option value="pvp">Player vs Player</option>
+    <option value="cpu">Player vs Computer</option>
+  </select>
+
+  <div class="board" id="board"></div>
+  <div class="status" id="status">Player X's Turn</div>
+  <button class="reset-btn" onclick="resetGame()">Reset Game</button>
+
+  <script>
+    var board = document.getElementById("board");
+    var statusText = document.getElementById("status");
+    var mode = document.getElementById("mode");
+    var currentPlayer = "X";
+    var gameOver = false;
+    var cells = [];
+
+    function startGame() {
+      board.innerHTML = "";
+      cells = [];
+      currentPlayer = "X";
+      gameOver = false;
+      statusText.textContent = "Player X's Turn";
+
+      for (var i = 0; i < 9; i++) {
+        var cell = document.createElement("div");
+        cell.className = "cell";
+        cell.dataset.index = i;
+        cell.addEventListener("click", cellClick);
+        board.appendChild(cell);
+        cells.push("");
+      }
+    }
+
+    function cellClick(e) {
+      var index = e.target.dataset.index;
+      if (cells[index] !== "" || gameOver) return;
+
+      cells[index] = currentPlayer;
+      e.target.textContent = currentPlayer;
+
+      if (checkWinner()) {
+        statusText.textContent = "Player " + currentPlayer + " Wins!";
+        gameOver = true;
+        return;
+      }
+
+      if (!cells.includes("")) {
+        statusText.textContent = "It's a Draw!";
+        gameOver = true;
+        return;
+      }
+
+      if (mode.value === "cpu" && currentPlayer === "X") {
+        currentPlayer = "O";
+        statusText.textContent = "Computer's Turn";
+        setTimeout(computerMove, 500);
+      } else {
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+        statusText.textContent = "Player " + currentPlayer + "'s Turn";
+      }
+    }
+
+    function computerMove() {
+      if (gameOver) return;
+
+      var empty = [];
+      for (var i = 0; i < cells.length; i++) {
+        if (cells[i] === "") empty.push(i);
+      }
+
+      if (empty.length === 0) return;
+
+      var randomIndex = empty[Math.floor(Math.random() * empty.length)];
+      cells[randomIndex] = "O";
+      board.children[randomIndex].textContent = "O";
+
+      if (checkWinner()) {
+        statusText.textContent = "Computer Wins!";
+        gameOver = true;
+        return;
+      }
+
+      if (!cells.includes("")) {
+        statusText.textContent = "It's a Draw!";
+        gameOver = true;
+        return;
+      }
+
+      currentPlayer = "X";
+      statusText.textContent = "Player X's Turn";
+    }
+
+    function checkWinner() {
+      var wins = [
+        [0,1,2], [3,4,5], [6,7,8],
+        [0,3,6], [1,4,7], [2,5,8],
+        [0,4,8], [2,4,6]
+      ];
+
+      for (var i = 0; i < wins.length; i++) {
+        var [a, b, c] = wins[i];
+        if (cells[a] && cells[a] === cells[b] && cells[b] === cells[c]) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function resetGame() {
+      startGame();
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
